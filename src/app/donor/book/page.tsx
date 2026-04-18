@@ -1,5 +1,4 @@
 // donorpulse-frontend\src\app\donor\book\page.tsx
-// src/app/donor/book/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,11 +7,6 @@ import { Button } from '@/components/ui/Button'
 import { Clock, User, Phone, CheckCircle, Building2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api-client'
-
-// Force no static generation
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
-export const revalidate = 0
 
 interface TimeSlot {
   machine_id: string

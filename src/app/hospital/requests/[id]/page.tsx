@@ -15,10 +15,10 @@ import {
   RefreshCw,
   Map,
 } from "lucide-react";
-import dynamic from "next/dynamic";
+import Dynamic from "next/dynamic";
 import apiClient from "@/lib/api-client";
 
-const GoogleDonorsMap = dynamic(() => import("@/components/GoogleDonorsMap"), {
+const GoogleDonorsMap = Dynamic(() => import("@/components/GoogleDonorsMap"), {
   ssr: false,
   loading: () => (
     <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">

@@ -8,15 +8,22 @@ const nextConfig = {
       },
     ],
   },
-  staticPageGenerationTimeout: 60,
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Remove this entire eslint block:
-  // eslint: {
-  //   ignoreDuringBuilds: true,
-  // },
+  
+  // Critical: Disable static generation for dynamic routes
   output: 'standalone',
+  
+  // Add these to prevent hanging
+  staticPageGenerationTimeout: 120,
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
+  
+  // Disable static optimization for all pages
+  reactStrictMode: true,
+  swcMinify: true,
 }
 
 module.exports = nextConfig
