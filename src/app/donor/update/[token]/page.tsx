@@ -1,12 +1,16 @@
 // donorpulse-frontend\src\app\donor\update\[token]\page.tsx  
-'use client'
-
-import { useParams } from 'next/navigation'
-import { DonorProfileUpdateForm } from '@/components/donor/DonorProfileUpdateForm'
+// app/donor/update/[token]/page.tsx
+import { Suspense } from 'react'
+import UpdateContent from './UpdateContent'
 
 export default function UpdatePage() {
-  const params = useParams()
-  const token = params.token as string
-  
-  return <DonorProfileUpdateForm token={token} />
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+      </div>
+    }>
+      <UpdateContent />
+    </Suspense>
+  )
 }
