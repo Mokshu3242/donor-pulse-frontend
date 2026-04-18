@@ -1,18 +1,13 @@
 // donorpulse-frontend\src\app\donor\book\page.tsx
 'use client'
 
-
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Calendar, Clock, User, Phone, CheckCircle, Building2 } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import apiClient from '@/lib/api-client'
 
-// Force dynamic rendering - no static generation
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
-export const revalidate = 0
 
 interface TimeSlot {
   machine_id: string
@@ -24,8 +19,7 @@ interface TimeSlot {
   room?: string
 }
 
-// Separate component that uses useSearchParams
-function BookAppointmentForm() {
+export default function BookAppointmentPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const donorId = searchParams.get('donor_id')
@@ -43,6 +37,7 @@ function BookAppointmentForm() {
   useEffect(() => {
     fetchDonor()
     fetchHospitals()
+    // Set default date to tomorrow
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     setSelectedDate(tomorrow.toISOString().split('T')[0])
@@ -54,6 +49,7 @@ function BookAppointmentForm() {
       return
     }
     try {
+      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get(`/donors/${donorId}`)
       setDonor(response.data)
     } catch (error) {
@@ -64,6 +60,7 @@ function BookAppointmentForm() {
 
   const fetchHospitals = async () => {
     try {
+      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get('/hospitals/')
       setHospitals(response.data.hospitals || [])
     } catch (error) {
@@ -82,6 +79,7 @@ function BookAppointmentForm() {
     setSelectedSlot(null)
     
     try {
+      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get('/appointments/slots/available', {
         params: {
           hospital_id: selectedHospital,
@@ -89,6 +87,8 @@ function BookAppointmentForm() {
           donation_type: donationType
         }
       })
+      
+      console.log('Slots response:', response.data)
       
       if (response.data.slots && response.data.slots.length > 0) {
         setSlots(response.data.slots)
@@ -106,10 +106,13 @@ function BookAppointmentForm() {
   }
 
   const handleSlotSelect = (slot: TimeSlot) => {
+    console.log('Selected slot:', slot)
     setSelectedSlot(slot)
   }
 
   const bookAppointment = async () => {
+    console.log('Booking appointment with selectedSlot:', selectedSlot)
+    
     if (!selectedSlot) {
       alert('Please select a time slot first')
       return
@@ -138,22 +141,31 @@ function BookAppointmentForm() {
         donation_type: donationType
       }
 
+      console.log('Sending booking data:', JSON.stringify(appointmentData, null, 2))
+
+      // Use apiClient instead of hardcoded URL
       const response = await apiClient.post('/appointments/book', appointmentData)
+
+      console.log('Booking response:', response.data)
       
       setSuccess(`Appointment booked successfully! Redirecting to receipt...`)
       
+      // Redirect to receipt page after 2 seconds
       setTimeout(() => {
         router.push(`/donor/appointment/${response.data.booking_token}`)
       }, 2000)
       
     } catch (error: any) {
       console.error('Booking error:', error)
+      console.error('Error response:', error.response?.data)
+      
       let errorMessage = 'Failed to book appointment'
       if (error.response?.data?.detail) {
         errorMessage = error.response.data.detail
       } else if (error.message) {
         errorMessage = error.message
       }
+      
       setError(errorMessage)
       alert(`Booking failed: ${errorMessage}`)
     } finally {
@@ -194,6 +206,7 @@ function BookAppointmentForm() {
       )}
       
       <div className="grid md:grid-cols-2 gap-6">
+        {/* Donor Info */}
         {donor && (
           <Card title="Donor Information">
             <div className="space-y-3">
@@ -213,6 +226,7 @@ function BookAppointmentForm() {
           </Card>
         )}
 
+        {/* Booking Form */}
         <Card title="Appointment Details">
           <div className="space-y-4">
             <div>
@@ -279,6 +293,7 @@ function BookAppointmentForm() {
         </Card>
       </div>
 
+      {/* Available Slots */}
       {slots.length > 0 && (
         <div className="mt-8">
           <Card title={`Available Time Slots for ${selectedDate}`}>
@@ -287,11 +302,14 @@ function BookAppointmentForm() {
                 <button
                   key={`${slot.time}-${slot.machine_id}-${index}`}
                   onClick={() => handleSlotSelect(slot)}
-                  className={`p-3 border rounded-lg text-center transition-all hover:shadow-md ${getSelectedSlotClass(slot)}`}
+                  className={`time-slot-button p-3 border rounded-lg text-center transition-all hover:shadow-md ${getSelectedSlotClass(slot)}`}
                 >
                   <Clock className="h-5 w-5 mx-auto mb-2" />
                   <div className="font-medium text-lg">{slot.time}</div>
                   <div className="text-xs mt-1">{slot.machine_name}</div>
+                  {slot.floor && (
+                    <div className="text-xs opacity-75 mt-1">{slot.floor}</div>
+                  )}
                 </button>
               ))}
             </div>
@@ -314,6 +332,7 @@ function BookAppointmentForm() {
                   onClick={bookAppointment} 
                   loading={loading}
                   className="w-full"
+                  disabled={!selectedSlot}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Confirm Appointment
@@ -336,21 +355,5 @@ function BookAppointmentForm() {
         </div>
       )}
     </div>
-  )
-}
-
-// Main page component with Suspense
-export default function BookAppointmentPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    }>
-      <BookAppointmentForm />
-    </Suspense>
   )
 }
