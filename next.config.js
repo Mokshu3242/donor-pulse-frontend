@@ -1,16 +1,40 @@
-﻿// frontend\next.config.js
+﻿// // frontend\next.config.js
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
+//   images: {
+//     remotePatterns: [
+//       {
+//         protocol: 'https',
+//         hostname: 'randomuser.me',
+//         pathname: '/**',
+//       },
+//     ],
+//   },
+//   reactStrictMode: true,
+// }
+
+// module.exports = nextConfig
+
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'randomuser.me',
-        pathname: '/**',
-      },
-    ],
+    domains: ['localhost', 'donorpulse-api.onrender.com'],
   },
-  reactStrictMode: true,
-}
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+      },
+    ];
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
