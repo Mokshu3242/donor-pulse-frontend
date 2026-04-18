@@ -1,0 +1,8 @@
+# render.yaml - Add these environment variables
+envVars:
+  - key: CORS_ORIGINS
+    value: "https://your-frontend.vercel.app,http://localhost:3000"
+  - key: BACKEND_URL
+    value: "https://donorpulse-api.onrender.com"
+  - key: ENVIRONMENT
+    value: "production"
