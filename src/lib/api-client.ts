@@ -1,8 +1,11 @@
-// lib/api-client.ts
+// frontend\src\lib\api-client.ts
 import axios from 'axios';
 
+// Use environment variable with fallback
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://donorpulse-api.onrender.com/api/v1';
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://donorpulse-api.onrender.com/api/v1',
+  baseURL: API_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -12,10 +15,12 @@ const apiClient = axios.create({
 // Request interceptor - add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // Try both token types
-    const token = localStorage.getItem('access_token') || localStorage.getItem('admin_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only run in browser
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token') || localStorage.getItem('admin_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -26,14 +31,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (typeof window !== 'undefined' && error.response?.status === 401) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('admin_token');
       localStorage.removeItem('hospital');
       localStorage.removeItem('admin');
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

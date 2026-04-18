@@ -1,4 +1,4 @@
-﻿// next.config.js
+﻿// frontend\next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -10,13 +10,18 @@ const nextConfig = {
     ],
   },
   typescript: {
-    ignoreBuildErrors: true, // Temporary - set to false after fixing
+    ignoreBuildErrors: false, // Set to false for production
   },
   eslint: {
-    ignoreDuringBuilds: true, // Temporary
+    ignoreDuringBuilds: false, // Set to false for production
   },
-  // Add this to prevent prerendering errors
   output: 'standalone',
-};
+  // Add this to handle static exports properly
+  trailingSlash: false,
+  // Ensure API routes work
+  rewrites: async () => {
+    return []
+  },
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
