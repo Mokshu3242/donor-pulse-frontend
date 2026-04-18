@@ -8,6 +8,7 @@ const nextConfig = {
       },
     ],
   },
+  staticPageGenerationTimeout: 60,
   typescript: {
     ignoreBuildErrors: true,
   },
