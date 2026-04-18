@@ -1,26 +1,15 @@
-﻿// frontend\next.config.js
-/** @type {import('next').NextConfig} */
+﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'randomuser.me',
+        pathname: '/**',
       },
     ],
   },
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  output: 'standalone',
-  trailingSlash: false,
-  
-  // Disable static generation for specific pages
-  output: 'standalone',
-  skipTrailingSlashRedirect: true,
-  
-  // This tells Next.js not to statically generate these pages
-  staticPageGenerationTimeout: 120,
+  reactStrictMode: true,
 }
 
 module.exports = nextConfig
