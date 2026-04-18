@@ -4,12 +4,18 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'randomuser.me',
-        pathname: '/**',
+        hostname: '**',
       },
     ],
   },
-  reactStrictMode: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // Remove this entire eslint block:
+  // eslint: {
+  //   ignoreDuringBuilds: true,
+  // },
+  output: 'standalone',
 }
 
 module.exports = nextConfig

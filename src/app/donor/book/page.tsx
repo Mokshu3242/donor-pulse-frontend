@@ -1,13 +1,18 @@
 // donorpulse-frontend\src\app\donor\book\page.tsx
+// src/app/donor/book/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Calendar, Clock, User, Phone, CheckCircle, Building2 } from 'lucide-react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { Clock, User, Phone, CheckCircle, Building2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api-client'
 
+// Force no static generation
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 interface TimeSlot {
   machine_id: string
@@ -20,9 +25,7 @@ interface TimeSlot {
 }
 
 export default function BookAppointmentPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const donorId = searchParams.get('donor_id')
   const [loading, setLoading] = useState(false)
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
@@ -33,24 +36,30 @@ export default function BookAppointmentPage() {
   const [donationType, setDonationType] = useState('whole_blood')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [donorId, setDonorId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchDonor()
+    // Get donor_id from URL query params safely
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get('donor_id')
+    setDonorId(id)
+    
+    if (!id) {
+      setError('No donor ID provided. Please register first.')
+      return
+    }
+    
+    fetchDonor(id)
     fetchHospitals()
-    // Set default date to tomorrow
+    
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     setSelectedDate(tomorrow.toISOString().split('T')[0])
   }, [])
 
-  const fetchDonor = async () => {
-    if (!donorId) {
-      setError('No donor ID provided. Please register first.')
-      return
-    }
+  const fetchDonor = async (id: string) => {
     try {
-      // Use apiClient instead of hardcoded URL
-      const response = await apiClient.get(`/donors/${donorId}`)
+      const response = await apiClient.get(`/donors/${id}`)
       setDonor(response.data)
     } catch (error) {
       console.error('Failed to fetch donor', error)
@@ -60,7 +69,6 @@ export default function BookAppointmentPage() {
 
   const fetchHospitals = async () => {
     try {
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get('/hospitals/')
       setHospitals(response.data.hospitals || [])
     } catch (error) {
@@ -79,7 +87,6 @@ export default function BookAppointmentPage() {
     setSelectedSlot(null)
     
     try {
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get('/appointments/slots/available', {
         params: {
           hospital_id: selectedHospital,
@@ -87,8 +94,6 @@ export default function BookAppointmentPage() {
           donation_type: donationType
         }
       })
-      
-      console.log('Slots response:', response.data)
       
       if (response.data.slots && response.data.slots.length > 0) {
         setSlots(response.data.slots)
@@ -106,13 +111,10 @@ export default function BookAppointmentPage() {
   }
 
   const handleSlotSelect = (slot: TimeSlot) => {
-    console.log('Selected slot:', slot)
     setSelectedSlot(slot)
   }
 
   const bookAppointment = async () => {
-    console.log('Booking appointment with selectedSlot:', selectedSlot)
-    
     if (!selectedSlot) {
       alert('Please select a time slot first')
       return
@@ -141,31 +143,20 @@ export default function BookAppointmentPage() {
         donation_type: donationType
       }
 
-      console.log('Sending booking data:', JSON.stringify(appointmentData, null, 2))
-
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.post('/appointments/book', appointmentData)
-
-      console.log('Booking response:', response.data)
       
       setSuccess(`Appointment booked successfully! Redirecting to receipt...`)
       
-      // Redirect to receipt page after 2 seconds
       setTimeout(() => {
         router.push(`/donor/appointment/${response.data.booking_token}`)
       }, 2000)
       
     } catch (error: any) {
       console.error('Booking error:', error)
-      console.error('Error response:', error.response?.data)
-      
       let errorMessage = 'Failed to book appointment'
       if (error.response?.data?.detail) {
         errorMessage = error.response.data.detail
-      } else if (error.message) {
-        errorMessage = error.message
       }
-      
       setError(errorMessage)
       alert(`Booking failed: ${errorMessage}`)
     } finally {
@@ -206,7 +197,6 @@ export default function BookAppointmentPage() {
       )}
       
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Donor Info */}
         {donor && (
           <Card title="Donor Information">
             <div className="space-y-3">
@@ -226,7 +216,6 @@ export default function BookAppointmentPage() {
           </Card>
         )}
 
-        {/* Booking Form */}
         <Card title="Appointment Details">
           <div className="space-y-4">
             <div>
@@ -293,7 +282,6 @@ export default function BookAppointmentPage() {
         </Card>
       </div>
 
-      {/* Available Slots */}
       {slots.length > 0 && (
         <div className="mt-8">
           <Card title={`Available Time Slots for ${selectedDate}`}>
@@ -302,14 +290,11 @@ export default function BookAppointmentPage() {
                 <button
                   key={`${slot.time}-${slot.machine_id}-${index}`}
                   onClick={() => handleSlotSelect(slot)}
-                  className={`time-slot-button p-3 border rounded-lg text-center transition-all hover:shadow-md ${getSelectedSlotClass(slot)}`}
+                  className={`p-3 border rounded-lg text-center transition-all hover:shadow-md ${getSelectedSlotClass(slot)}`}
                 >
                   <Clock className="h-5 w-5 mx-auto mb-2" />
                   <div className="font-medium text-lg">{slot.time}</div>
                   <div className="text-xs mt-1">{slot.machine_name}</div>
-                  {slot.floor && (
-                    <div className="text-xs opacity-75 mt-1">{slot.floor}</div>
-                  )}
                 </button>
               ))}
             </div>
@@ -332,7 +317,6 @@ export default function BookAppointmentPage() {
                   onClick={bookAppointment} 
                   loading={loading}
                   className="w-full"
-                  disabled={!selectedSlot}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Confirm Appointment
