@@ -1,4 +1,3 @@
-// donorpulse-frontend\src\app\donor\update\[token]\page.tsx  
 // app/donor/update/[token]/page.tsx
 import { Suspense } from 'react'
 import UpdateContent from './UpdateContent'

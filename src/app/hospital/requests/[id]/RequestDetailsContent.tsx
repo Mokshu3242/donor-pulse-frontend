@@ -62,7 +62,7 @@ interface RequestDetails {
 
 type UrgencyColorKey = "routine" | "urgent" | "critical" | "sos";
 
-export default function RequestDetailsPage() {
+export default function RequestDetailsContent() {
   const params = useParams();
   const router = useRouter();
   const requestId = params.id as string;

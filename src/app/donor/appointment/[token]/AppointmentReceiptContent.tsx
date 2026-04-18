@@ -36,7 +36,7 @@ interface AppointmentDetails {
   notes?: string
 }
 
-export default function AppointmentReceiptPage() {
+export default function AppointmentReceiptContent() {
   const params = useParams()
   const token = params.token as string
   const [appointment, setAppointment] = useState<AppointmentDetails | null>(null)
