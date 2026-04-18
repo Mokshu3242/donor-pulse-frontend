@@ -18,6 +18,7 @@ interface TimeSlot {
   room?: string
 }
 
+
 export default function BookAppointmentContent() {
   const searchParams = useSearchParams()
   const router = useRouter()

@@ -1,12 +1,8 @@
 // app/donor/book/page.tsx
-import dynamic from 'next/dynamic'
+import ClientWrapper from './ClientWrapper'
 
-// Completely disable SSR for this page
-const BookAppointmentContent = dynamic(
-  () => import('./BookAppointmentContent'),
-  { ssr: false }
-)
+export const dynamic = 'force-dynamic'
 
 export default function BookAppointmentPage() {
-  return <BookAppointmentContent />
+  return <ClientWrapper />
 }
