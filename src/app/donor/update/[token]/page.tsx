@@ -1,11 +1,12 @@
-// app/donor/update/[token]/page.tsx
-import dynamic from 'next/dynamic'
+// donorpulse-frontend\src\app\donor\update\[token]\page.tsx  
+'use client'
 
-const UpdateContent = dynamic(
-  () => import('./UpdateContent'),
-  { ssr: false }
-)
+import { useParams } from 'next/navigation'
+import { DonorProfileUpdateForm } from '@/components/donor/DonorProfileUpdateForm'
 
 export default function UpdatePage() {
-  return <UpdateContent />
+  const params = useParams()
+  const token = params.token as string
+  
+  return <DonorProfileUpdateForm token={token} />
 }
