@@ -10,18 +10,17 @@ const nextConfig = {
     ],
   },
   typescript: {
-    ignoreBuildErrors: false, // Set to false for production
-  },
-  eslint: {
-    ignoreDuringBuilds: false, // Set to false for production
+    ignoreBuildErrors: false,
   },
   output: 'standalone',
-  // Add this to handle static exports properly
   trailingSlash: false,
-  // Ensure API routes work
-  rewrites: async () => {
-    return []
-  },
+  
+  // Disable static generation for specific pages
+  output: 'standalone',
+  skipTrailingSlashRedirect: true,
+  
+  // This tells Next.js not to statically generate these pages
+  staticPageGenerationTimeout: 120,
 }
 
 module.exports = nextConfig
