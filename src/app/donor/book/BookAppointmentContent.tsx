@@ -1,4 +1,4 @@
-// frontend\src\app\donor\book\BookAppointmentContent.tsx
+// app/donor/book/BookAppointmentContent.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button'
 import { Calendar, Clock, User, Phone, CheckCircle, Building2 } from 'lucide-react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import apiClient from '@/lib/api-client'
-
 
 interface TimeSlot {
   machine_id: string
@@ -37,7 +36,6 @@ export default function BookAppointmentContent() {
   useEffect(() => {
     fetchDonor()
     fetchHospitals()
-    // Set default date to tomorrow
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     setSelectedDate(tomorrow.toISOString().split('T')[0])
@@ -49,7 +47,6 @@ export default function BookAppointmentContent() {
       return
     }
     try {
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get(`/donors/${donorId}`)
       setDonor(response.data)
     } catch (error) {
@@ -60,7 +57,6 @@ export default function BookAppointmentContent() {
 
   const fetchHospitals = async () => {
     try {
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get('/hospitals/')
       setHospitals(response.data.hospitals || [])
     } catch (error) {
@@ -79,7 +75,6 @@ export default function BookAppointmentContent() {
     setSelectedSlot(null)
     
     try {
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.get('/appointments/slots/available', {
         params: {
           hospital_id: selectedHospital,
@@ -87,8 +82,6 @@ export default function BookAppointmentContent() {
           donation_type: donationType
         }
       })
-      
-      console.log('Slots response:', response.data)
       
       if (response.data.slots && response.data.slots.length > 0) {
         setSlots(response.data.slots)
@@ -106,13 +99,10 @@ export default function BookAppointmentContent() {
   }
 
   const handleSlotSelect = (slot: TimeSlot) => {
-    console.log('Selected slot:', slot)
     setSelectedSlot(slot)
   }
 
   const bookAppointment = async () => {
-    console.log('Booking appointment with selectedSlot:', selectedSlot)
-    
     if (!selectedSlot) {
       alert('Please select a time slot first')
       return
@@ -141,31 +131,21 @@ export default function BookAppointmentContent() {
         donation_type: donationType
       }
 
-      console.log('Sending booking data:', JSON.stringify(appointmentData, null, 2))
-
-      // Use apiClient instead of hardcoded URL
       const response = await apiClient.post('/appointments/book', appointmentData)
-
-      console.log('Booking response:', response.data)
       
       setSuccess(`Appointment booked successfully! Redirecting to receipt...`)
       
-      // Redirect to receipt page after 2 seconds
       setTimeout(() => {
         router.push(`/donor/appointment/${response.data.booking_token}`)
       }, 2000)
       
     } catch (error: any) {
-      console.error('Booking error:', error)
-      console.error('Error response:', error.response?.data)
-      
       let errorMessage = 'Failed to book appointment'
       if (error.response?.data?.detail) {
         errorMessage = error.response.data.detail
       } else if (error.message) {
         errorMessage = error.message
       }
-      
       setError(errorMessage)
       alert(`Booking failed: ${errorMessage}`)
     } finally {
