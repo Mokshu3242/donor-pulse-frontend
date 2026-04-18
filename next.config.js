@@ -19,22 +19,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost', 'donorpulse-api.onrender.com'],
-  },
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
-  async rewrites() {
-    return [
+    remotePatterns: [
       {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+        protocol: 'https',
+        hostname: '**',
       },
-    ];
+    ],
   },
+  // Remove eslint from here - it should be in .eslintrc.json
 };
 
 module.exports = nextConfig;
